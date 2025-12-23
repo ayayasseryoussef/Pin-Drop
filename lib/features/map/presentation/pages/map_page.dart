@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -26,7 +28,7 @@ class _MapPageState extends State<MapPage> {
               GoogleMap(
                 initialCameraPosition: const CameraPosition(
                   target: LatLng(30.0, 30.0),
-                  zoom: 30,
+                  zoom: 15,
                 ),
                 onMapCreated: (controller) {
                   _mapController = controller;
@@ -34,27 +36,24 @@ class _MapPageState extends State<MapPage> {
                 onCameraMove: (_) =>
                     context.read<PinCubit>().onMapMove(),
                 onCameraIdle: () async {
-                 final screenSize = MediaQuery.of(context).size;
-
-  final centerLatLng = await _mapController.getLatLng(
-    ScreenCoordinate(
-      x: (screenSize.width / 2).round(),
-      y: (screenSize.height / 2).round(),
-    ),
-  );
-
-  context
-      .read<PinCubit>()
-      .onMapIdle(centerLatLng.latitude, centerLatLng.longitude);
-},),
-
-              PinMarker(
-                isDragging: state.isDragging,
-                isAvailable: state.isAvailable,
+                  final position = await _mapController.getLatLng(
+                      ScreenCoordinate(x: 0, y: 0));
+                  context.read<PinCubit>().onMapIdle(
+                      position.latitude, position.longitude);
+                },
               ),
 
               Positioned(
-                top: 60,
+                top: MediaQuery.sizeOf(context).height/2.1,
+                child: PinMarker(
+                  isDragging: state.isDragging,
+                  isAvailable: state.isAvailable,
+                ),
+              ),
+
+              Positioned(
+
+                top: MediaQuery.sizeOf(context).height/1.8,
                 child: AvailabilityBadge(available: state.isAvailable),
               ),
             ],
